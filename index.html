@@ -16,25 +16,21 @@
         body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; padding-bottom: 80px; }
         h1 { text-align: center; margin-bottom: 20px; color: var(--primary); font-size: 24px; text-transform: uppercase; letter-spacing: 2px;}
         
-        /* Menu de Dias */
         .days-nav { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 15px; margin-bottom: 20px; }
         .days-nav::-webkit-scrollbar { display: none; }
         .day-btn { background-color: var(--card-bg); color: var(--text-main); border: 1px solid #333; padding: 10px 20px; border-radius: 8px; cursor: pointer; white-space: nowrap; font-weight: bold; transition: 0.3s; }
         .day-btn.active { background-color: var(--primary); color: #000; border-color: var(--primary); }
 
-        /* Cards de Exercícios */
         #workout-container { display: flex; flex-direction: column; gap: 15px; }
         .exercise-card { background-color: var(--card-bg); padding: 15px; border-radius: 10px; border-left: 4px solid var(--primary); cursor: pointer; transition: all 0.3s ease; position: relative; }
         .exercise-name { font-size: 18px; font-weight: bold; margin-bottom: 5px; transition: 0.3s; }
         .exercise-series { font-size: 16px; color: var(--primary); font-weight: bold; margin-bottom: 5px; transition: 0.3s; }
         .exercise-obs { font-size: 13px; color: var(--text-muted); }
 
-        /* Estilo do Exercício Concluído */
         .exercise-card.done { opacity: 0.4; border-left-color: #555; background-color: #111; }
         .exercise-card.done .exercise-name { text-decoration: line-through; color: var(--text-muted); }
         .exercise-card.done .exercise-series { color: #555; }
 
-        /* Header Regras */
         .regras-box { background-color: #2a2a2a; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; color: #ddd; }
         .regras-box span { color: var(--primary); font-weight: bold; }
         .dica-box { text-align: center; font-size: 12px; color: var(--text-muted); margin-bottom: 15px; }
@@ -51,13 +47,8 @@
 
     <div class="dica-box">👉 Toque no card para marcar/desmarcar como feito</div>
 
-    <div class="days-nav" id="days-nav">
-        <!-- Botões gerados via JS -->
-    </div>
-
-    <div id="workout-container">
-        <!-- Exercícios gerados via JS -->
-    </div>
+    <div class="days-nav" id="days-nav"></div>
+    <div id="workout-container"></div>
 
     <script>
         const workoutData = {
@@ -112,64 +103,46 @@
 
         const daysNav = document.getElementById('days-nav');
         const workoutContainer = document.getElementById('workout-container');
-
-        // Pega o dia atual da semana em português
         const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
         let hoje = diasSemana[new Date().getDay()];
         if (hoje === 'Domingo') hoje = 'Segunda';
 
-        // Lógica para salvar os concluídos no localStorage
         function toggleDone(day, index, cardElement) {
             let doneExercises = JSON.parse(localStorage.getItem('done_' + day)) || [];
-            
             if (doneExercises.includes(index)) {
-                // Se já tá feito, desmarca
                 doneExercises = doneExercises.filter(i => i !== index);
                 cardElement.classList.remove('done');
             } else {
-                // Se não tá feito, marca
                 doneExercises.push(index);
                 cardElement.classList.add('done');
             }
-            
             localStorage.setItem('done_' + day, JSON.stringify(doneExercises));
         }
 
         function renderWorkout(day) {
             workoutContainer.innerHTML = '';
-            
-            // Busca o que já foi feito naquele dia no navegador
             let doneExercises = JSON.parse(localStorage.getItem('done_' + day)) || [];
 
             workoutData[day].forEach((ex, index) => {
                 const card = document.createElement('div');
                 card.className = 'exercise-card';
-                
-                // Se o índice do exercício estiver salvo no localStorage, aplica a classe done
-                if (doneExercises.includes(index)) {
-                    card.classList.add('done');
-                }
+                if (doneExercises.includes(index)) card.classList.add('done');
 
                 card.innerHTML = `
                     <div class="exercise-name">${ex.name}</div>
                     <div class="exercise-series">${ex.series}</div>
                     <div class="exercise-obs">${ex.obs}</div>
                 `;
-
-                // Evento de clique para marcar/desmarcar
                 card.onclick = () => toggleDone(day, index, card);
-
                 workoutContainer.appendChild(card);
             });
 
-            // Atualiza o menu superior
             document.querySelectorAll('.day-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.innerText === day) btn.classList.add('active');
             });
         }
 
-        // Criar botões do menu
         Object.keys(workoutData).forEach(day => {
             const btn = document.createElement('button');
             btn.className = `day-btn ${day === hoje ? 'active' : ''}`;
@@ -178,7 +151,6 @@
             daysNav.appendChild(btn);
         });
 
-        // Iniciar
         renderWorkout(hoje);
     </script>
 </body>
